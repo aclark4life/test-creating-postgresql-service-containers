@@ -1,0 +1,39 @@
+name: PostGIS
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_DB: test_db
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up PostgreSQL with PostGIS
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y postgresql-15-postgis-3 postgresql-15-postgis-3-scripts
+        sudo service postgresql start
+        psql -U postgres -d test_db -c "CREATE EXTENSION postgis;"
+
+    - name: Run tests
+      env:
+        DATABASE_URL: postgres://postgres:postgres@localhost:5432/test_db
+      run: |
+        # Replace with your test command
+        echo "Running tests..."
