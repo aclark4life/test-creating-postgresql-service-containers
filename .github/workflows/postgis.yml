@@ -31,9 +31,9 @@ jobs:
           sleep 1
         done
 
-    - name: Create PostGIS extension
+    - name: Create PostGIS extension if not exists
       run: |
-        PGPASSWORD=postgres psql -h localhost -U postgres -d test_db -c "CREATE EXTENSION postgis;"
+        PGPASSWORD=postgres psql -h localhost -U postgres -d test_db -c "DO \$\$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'postgis') THEN CREATE EXTENSION postgis; END IF; END \$\$;"
 
     - name: Run tests
       env:
