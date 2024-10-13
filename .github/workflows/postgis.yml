@@ -33,7 +33,7 @@ jobs:
 
     - name: Create PostGIS extension
       run: |
-        psql -U postgres -d test_db -c "CREATE EXTENSION postgis;"
+        PGPASSWORD=postgres psql -h localhost -U postgres -d test_db -c "CREATE EXTENSION postgis;"
 
     - name: Run tests
       env:
