@@ -1,4 +1,4 @@
-name: PostGIS
+name: CI
 
 on: [push, pull_request]
 
@@ -8,7 +8,7 @@ jobs:
 
     services:
       postgres:
-        image: postgres:15
+        image: postgis/postgis:15-3.3
         ports:
           - 5432:5432
         env:
@@ -24,11 +24,15 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Set up PostgreSQL with PostGIS
+    - name: Wait for PostgreSQL to be ready
       run: |
-        sudo apt-get update
-        sudo apt-get install -y postgresql-15-postgis-3 postgresql-15-postgis-3-scripts
-        sudo service postgresql start
+        until pg_isready -h localhost -p 5432 -U postgres; do
+          echo "Waiting for PostgreSQL to be ready..."
+          sleep 1
+        done
+
+    - name: Create PostGIS extension
+      run: |
         psql -U postgres -d test_db -c "CREATE EXTENSION postgis;"
 
     - name: Run tests
